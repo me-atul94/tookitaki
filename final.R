@@ -79,6 +79,7 @@ categorical_bivariate(train_plot,train_plot$feature_46,"feature_46")
 categorical_bivariate(train_plot,train_plot$feature_28,"feature_28")
 
 
+
 change_data <- function(df1,df2,num_rows){
   
   #formatting Last payment and end date column of raw_account to find out whether he paid late and change to factor 
@@ -338,7 +339,7 @@ summary(model_3)
 
 ### Test Data ####
 
-#predicted probabilities of Attrition for test data
+#predicted probabilities of default for test data
 
 test_pred = predict(model_3, type = "response", 
                     newdata = test)
@@ -346,11 +347,11 @@ test_pred = predict(model_3, type = "response",
 summary(test_pred)
 
 
-test_pred_attrition <- factor(ifelse(test_pred > 0.5,'Yes','No'))
-test_actual_attrition <- factor(ifelse(test$Bad_label == 1 , 'Yes','No'))
+test_pred_default <- factor(ifelse(test_pred > 0.5,'Yes','No'))
+test_actual_default <- factor(ifelse(test$Bad_label == 1 , 'Yes','No'))
 
 library(caret)
-test_conf <- confusionMatrix(test_pred_attrition, test_actual_attrition, positive = "Yes")
+test_conf <- confusionMatrix(test_pred_default, test_actual_default, positive = "Yes")
 test_conf
 
 
@@ -363,8 +364,8 @@ test_conf
 
 perform_fn <- function(cutoff) 
 {
-  predicted_attrition <- factor(ifelse(test_pred >= cutoff, "Yes", "No"))
-  conf <- confusionMatrix(predicted_attrition, test_actual_attrition, positive = "Yes")
+  predicted_default <- factor(ifelse(test_pred >= cutoff, "Yes", "No"))
+  conf <- confusionMatrix(predicted_default, test_actual_default, positive = "Yes")
   acc <- conf$overall[1]
   sens <- conf$byClass[1]
   spec <- conf$byClass[2]
@@ -405,9 +406,9 @@ cutoff
 
 # Let's choose a cutoff value of 0.1 for final model
 
-test_cutoff_attrition <- factor(ifelse(test_pred >=0.1, "Yes", "No"))
+test_cutoff_default <- factor(ifelse(test_pred >=0.1, "Yes", "No"))
 
-conf_final <- confusionMatrix(test_cutoff_attrition, test_actual_attrition, positive = "Yes")
+conf_final <- confusionMatrix(test_cutoff_default, test_actual_default, positive = "Yes")
 
 acc <- conf_final$overall[1]
 
@@ -425,11 +426,11 @@ spec
 
 
 
-class(test_pred_attrition)
-class(test_actual_attrition)
+class(test_pred_default)
+class(test_actual_default)
 
-test_cutoff_attrition <- ifelse(test_pred_attrition=="Yes",1,0)
-test_actual_attrition <- ifelse(test_actual_attrition=="Yes",1,0)
+test_cutoff_default <- ifelse(test_pred_default=="Yes",1,0)
+test_actual_default <- ifelse(test_actual_default=="Yes",1,0)
 
 
 
@@ -438,7 +439,7 @@ test_actual_attrition <- ifelse(test_actual_attrition=="Yes",1,0)
 
 myeval <- matrix(nrow = length(test_pred),ncol = 2)
 myeval[,1] <- test_pred
-myeval[,2] <- test_actual_attrition
+myeval[,2] <- test_actual_default
 colnames(myeval) <- c("Predicted_Prob","Actual_Labels")
 write.csv(myeval,"myeval.csv")
 
@@ -449,7 +450,7 @@ write.csv(myeval,"myeval.csv")
 install.packages()
 library(ROCR)
 #on testing  data
-pred_object_test<- prediction(test_cutoff_attrition, test_actual_attrition)
+pred_object_test<- prediction(test_cutoff_default, test_actual_default)
 
 performance_measures_test<- performance(pred_object_test, "tpr", "fpr")
 
